@@ -109,8 +109,22 @@ class _ChatPageState extends State<ChatPage> {
               children: [
                 IconButton(
                     onPressed: () {
-
-                    },
+                      showModalBottomSheet(
+                        context: context,
+                        builder: (context) {
+                          return Padding(
+                            padding: EdgeInsets.all(5),
+                            child: Column(
+                              children: [
+                                Row(
+                                  children: [
+                                    
+                                  ]
+                                )
+                              ]
+                            )
+                        },
+                        }
                     icon: Icon(Icons.insert_emoticon)
                 ),
                 Expanded(
@@ -273,3 +287,36 @@ class MyMessage extends StatelessWidget {
   }
 }
 
+class Sticker extends StatefullWidget {
+  late int id;
+  late String login;
+  late IO.Socket socket;
+  Stricker({super.key, required this.id, required this.login, required.socket})
+
+  @override
+  State<Sticker> createState() => _StickerState();
+}
+
+class _StickerState extends State<> {
+
+  @override
+  Widget build(BuildContext context) {
+    Size size = MediaQuery
+        .of(context)
+        .size;
+    return Container(
+      width: (size.width - 10) * 0.25,
+      height: (size.width - 10) * 0.25,
+      child: Padding(
+        padding: EdgeInsets.all(5),
+        child: Center(
+          child: InkWell(
+          onPressed: () {
+            widget.socket.emit('send_sticker', {'login': widget.login, 'stickerid': widget.id})
+          }
+        )
+      ),
+    )
+      )
+  }
+}  
