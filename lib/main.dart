@@ -38,10 +38,21 @@ class _ChatPageState extends State<ChatPage> {
   void addMessage(message, nickname) {
     setState(() {
       if (nickname == widget.userNickname) {
-        messages.add(MyMessage(text: message));
+        messages.add(MyMessage(text: message, nickname: nickname,));
       }
       else {
-        messages.add(OtherMessage(text: message));
+        messages.add(OtherMessage(text: message, nickname: nickname,));
+      }
+    });
+  }
+
+  void addSticker(id, nickname) {
+    setState(() {
+      if (nickname == widget.userNickname) {
+        messages.add(MySticker(id: id, nickname: nickname,));
+      }
+      else {
+        messages.add(OtherSticker(id: id, nickname: nickname));
       }
     });
   }
@@ -57,8 +68,9 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   void initSocket() {
-    socket = IO.io('https://877d-188-186-24-67.ngrok-free.app', <String, dynamic>{'transports': ['websocket'],});
+    socket = IO.io('https://cdda-109-170-98-2.ngrok-free.app', <String, dynamic>{'transports': ['websocket'],});
     socket.on('get_message', (messageData) => addMessage(messageData['message'], messageData['nickname']));
+    socket.on('get_sticker', (messageData) => addSticker(messageData['id'], messageData['nickname']));
     socket.connect();
     print("Connected");
   }
@@ -114,17 +126,42 @@ class _ChatPageState extends State<ChatPage> {
                         builder: (context) {
                           return Padding(
                             padding: EdgeInsets.all(5),
-                            child: Column(
-                              children: [
-                                Row(
+                            child: SingleChildScrollView(
+                              child: Column(
                                   children: [
-                                    
+                                    Row(
+                                        children: [
+                                          Sticker(id: 1, login: widget.userNickname, socket: socket),
+                                          Sticker(id: 2, login: widget.userNickname, socket: socket),
+                                          Sticker(id: 3, login: widget.userNickname, socket: socket),
+                                        ]
+                                    ),
+                                    Row(
+                                        children: [
+                                          Sticker(id: 4, login: widget.userNickname, socket: socket),
+                                          Sticker(id: 5, login: widget.userNickname, socket: socket),
+                                          Sticker(id: 6, login: widget.userNickname, socket: socket),
+                                        ]
+                                    ),
+                                    Row(
+                                        children: [
+                                          Sticker(id: 7, login: widget.userNickname, socket: socket),
+                                          Sticker(id: 8, login: widget.userNickname, socket: socket),
+                                          Sticker(id: 9, login: widget.userNickname, socket: socket),
+                                        ]
+                                    ),
+                                    Row(
+                                        children: [
+                                          Sticker(id: 10, login: widget.userNickname, socket: socket),
+                                        ]
+                                    ),
                                   ]
-                                )
-                              ]
+                              )
                             )
+                          );
                         },
-                        }
+                      );
+                        },
                     icon: Icon(Icons.insert_emoticon)
                 ),
                 Expanded(
@@ -161,11 +198,10 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
 
-  late String nickname;
+  String nickname = '';
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       body: Center(
 
@@ -182,14 +218,33 @@ class _LoginPageState extends State<LoginPage> {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            TextField(
-              onChanged: (value) {
-                nickname = value;
-              },
+            Padding(padding: EdgeInsets.only(left: 30, right: 30, bottom: 20),
+              child: TextField(
+                onChanged: (value) {
+                  nickname = value;
+                },
+              ),
             ),
+
             ElevatedButton(
-                onPressed: () {Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ChatPage(userNickname: nickname)));},
+                onPressed: () {
+                  if (nickname != '') {
+                    Navigator.pushReplacement(context, MaterialPageRoute(
+                        builder: (context) => ChatPage(userNickname: nickname)));
+                  }
+
+                },
                 child: Text("Продолжить")
+            ),
+            Padding(padding: EdgeInsets.only(top: 20, left: 30, right: 30),
+              child: Text("Пожалуйста! Исползуйте оригинальный никнейм, не содержащий негативных высказываний или нецензурной лексики",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: 'Calibri',
+                  fontSize: 15,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
             )
           ],
         ),
@@ -201,8 +256,9 @@ class _LoginPageState extends State<LoginPage> {
 class OtherMessage extends StatelessWidget {
 
   late String text;
+  late String nickname;
 
-  OtherMessage({super.key, required this.text});
+  OtherMessage({super.key, required this.text, required this.nickname});
 
   @override
   Widget build(BuildContext context) {
@@ -218,7 +274,6 @@ class OtherMessage extends StatelessWidget {
                   constraints: BoxConstraints(
                       minHeight: 20,
                       maxWidth: size.width * 0.7,
-                      minWidth: size.width * 0.5
                   ),
                   child: DecoratedBox(
                       decoration: BoxDecoration(
@@ -226,13 +281,30 @@ class OtherMessage extends StatelessWidget {
                         color: Colors.lightBlueAccent,
                       ),
                       child: Padding(
-                        padding: EdgeInsets.all(10),
-                        child: Text(
-                          text,
-                          style: TextStyle(fontFamily: 'Calibri',
-                              fontSize: 10,
-                              fontWeight: FontWeight.w400),
-                        ),
+                          padding: EdgeInsets.all(10),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                  padding: EdgeInsets.only(bottom: 5),
+                                child: Text(
+                                    nickname,
+                                    style: TextStyle(fontFamily: 'Calibri',
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w800,
+                                        color: Colors.white)
+                                ),
+                              ),
+                              Text(
+                                  text,
+                                  style: TextStyle(fontFamily: 'Calibri',
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w400,
+                                      color: Colors.white)
+                              ),
+                            ],
+                          )
+
                       )
                   )
               )
@@ -245,8 +317,9 @@ class OtherMessage extends StatelessWidget {
 class MyMessage extends StatelessWidget {
 
   late String text;
+  late String nickname;
 
-  MyMessage({super.key, required this.text});
+  MyMessage({super.key, required this.text, required this.nickname});
 
   @override
   Widget build(BuildContext context) {
@@ -262,7 +335,6 @@ class MyMessage extends StatelessWidget {
               constraints: BoxConstraints(
                   minHeight: 20,
                   maxWidth: size.width * 0.7,
-                  minWidth: size.width * 0.5
               ),
               child: DecoratedBox(
                   decoration: BoxDecoration(
@@ -270,14 +342,29 @@ class MyMessage extends StatelessWidget {
                     color: Colors.teal,
                   ),
                   child: Padding(
-                    padding: EdgeInsets.all(10),
-                    child: Text(
-                      text,
-                      style: TextStyle(fontFamily: 'Calibri',
-                          fontSize: 10,
-                          fontWeight: FontWeight.w400,
-                          color: Colors.white),
-                    ),
+                      padding: EdgeInsets.all(10),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.only(bottom: 5),
+                            child: Text(
+                                nickname,
+                                style: TextStyle(fontFamily: 'Calibri',
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w800,
+                                    color: Colors.white)
+                            ),
+                          ),
+                          Text(
+                              text,
+                              style: TextStyle(fontFamily: 'Calibri',
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w400,
+                                  color: Colors.white)
+                          ),
+                        ],
+                      )
                   )
               )
           ),
@@ -287,17 +374,114 @@ class MyMessage extends StatelessWidget {
   }
 }
 
-class Sticker extends StatefullWidget {
+class OtherSticker extends StatelessWidget {
+
+  late int id;
+  late String nickname;
+
+  OtherSticker({super.key, required this.id, required this.nickname});
+
+  @override
+  Widget build(BuildContext context) {
+    Size size = MediaQuery
+        .of(context)
+        .size;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsets.only(right: 10, top: 10),
+          child: ConstrainedBox(
+              constraints: BoxConstraints(
+                  minHeight: 20,
+                  maxWidth: size.width * 0.3,
+                  minWidth: size.width * 0.3
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.only(bottom: 5),
+                    child: Text(
+                        nickname,
+                        style: TextStyle(fontFamily: 'Calibri',
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.black)
+                    ),
+                  ),
+                  Image.asset(
+                      'assets/stickers/${id}.png', height: size.width * 0.4,
+                      width: size.width * 0.4)
+                ],
+              )
+          ),
+        )
+      ],
+    );
+  }
+}
+
+class MySticker extends StatelessWidget {
+
+  late int id;
+  late String nickname;
+
+  MySticker({super.key, required this.id, required this.nickname});
+
+  @override
+  Widget build(BuildContext context) {
+    Size size = MediaQuery
+        .of(context)
+        .size;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        Padding(
+          padding: EdgeInsets.only(right: 10, top: 10),
+          child: ConstrainedBox(
+              constraints: BoxConstraints(
+                  minHeight: 20,
+                  maxWidth: size.width * 0.4,
+                  minWidth: size.width * 0.4
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.only(bottom: 5),
+                    child: Text(
+                        nickname,
+                        style: TextStyle(fontFamily: 'Calibri',
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.black)
+                    ),
+                  ),
+                  Image.asset(
+                      'assets/stickers/${id}.png', height: size.width * 0.4,
+                      width: size.width * 0.4)
+                ],
+              )
+
+          ),
+        )
+      ],
+    );
+  }
+}
+
+class Sticker extends StatefulWidget {
   late int id;
   late String login;
   late IO.Socket socket;
-  Stricker({super.key, required this.id, required this.login, required.socket})
+  Sticker({super.key, required this.id, required this.login, required this.socket});
 
   @override
   State<Sticker> createState() => _StickerState();
 }
 
-class _StickerState extends State<> {
+class _StickerState extends State<Sticker> {
 
   @override
   Widget build(BuildContext context) {
@@ -305,18 +489,26 @@ class _StickerState extends State<> {
         .of(context)
         .size;
     return Container(
-      width: (size.width - 10) * 0.25,
-      height: (size.width - 10) * 0.25,
-      child: Padding(
-        padding: EdgeInsets.all(5),
-        child: Center(
-          child: InkWell(
-          onPressed: () {
-            widget.socket.emit('send_sticker', {'login': widget.login, 'stickerid': widget.id})
-          }
+        width: (size.width - 10) * 0.333,
+        height: (size.width - 10) * 0.333,
+        child: Padding(
+          padding: EdgeInsets.all(5),
+          child: Center(
+              child: Ink.image(
+                image: AssetImage(
+                    'assets/stickers/${widget.id}.png'
+                ),
+                fit: BoxFit.cover,
+                child: InkWell(
+                  onTap: () {
+                    widget.socket.emit('send_sticker',
+                        {'nickname': widget.login, 'id': widget.id});
+                    Navigator.pop(context);
+                  },
+                ),
+              )
+          ),
         )
-      ),
-    )
-      )
+    );
   }
-}  
+}
