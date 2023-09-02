@@ -68,7 +68,7 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   void initSocket() {
-    socket = IO.io('https://cdda-109-170-98-2.ngrok-free.app', <String, dynamic>{'transports': ['websocket'],});
+    socket = IO.io('https://877c-188-132-129-48.ngrok-free.app', <String, dynamic>{'transports': ['websocket'],});
     socket.on('get_message', (messageData) => addMessage(messageData['message'], messageData['nickname']));
     socket.on('get_sticker', (messageData) => addSticker(messageData['id'], messageData['nickname']));
     socket.connect();
